@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agentpassport.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "agentpassport.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "agentpassport.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "agentpassport.name" . }}
+    spec:
+      containers:
+        - name: agentpassport
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 8420
+          env:
+            - name: AGENTPASSPORT_PASSPORT__SECRET
+              value: {{ .Values.config.secret | quote }}
+            - name: AGENTPASSPORT_AUDIT__INTERVAL_SEC
+              value: {{ .Values.config.auditIntervalSec | quote }}
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8420 }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8420 }
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

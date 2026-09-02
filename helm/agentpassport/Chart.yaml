@@ -1,0 +1,6 @@
+apiVersion: v2
+name: agentpassport
+description: 智能体数字护照与循环审计治理平台
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

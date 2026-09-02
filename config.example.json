@@ -1,0 +1,35 @@
+{
+  "passport": {
+    "secret": "change-me-in-production",
+    "default_ttl_days": 365,
+    "issuer": "agentpassport-ca"
+  },
+  "audit": {
+    "interval_sec": 3600,
+    "loop_enabled": true,
+    "drift_threshold": 0.05
+  },
+  "channel": {
+    "allowed_topologies": ["hub", "chain", "broadcast", "tree", "star"],
+    "forbid_p2p_mesh": true
+  },
+  "policy": {
+    "default": "deny",
+    "compliance": ["eu-ai-act", "cn-agent-governance"]
+  },
+  "storage": {
+    "type": "sqlite",
+    "path": "data/agentpassport.db"
+  },
+  "providers": {
+    "default": "mock",
+    "timeout_sec": 60
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8420
+  },
+  "logging": {
+    "level": "INFO"
+  }
+}

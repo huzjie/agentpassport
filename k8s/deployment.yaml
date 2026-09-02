@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentpassport
+  labels:
+    app: agentpassport
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: agentpassport
+  template:
+    metadata:
+      labels:
+        app: agentpassport
+    spec:
+      containers:
+        - name: agentpassport
+          image: agentpassport:1.0.0
+          ports:
+            - containerPort: 8420
+          env:
+            - name: AGENTPASSPORT_SERVER__HOST
+              value: "0.0.0.0"
+            - name: AGENTPASSPORT_PASSPORT__SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: agentpassport-secret
+                  key: secret
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8420 }
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8420 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "512Mi" }

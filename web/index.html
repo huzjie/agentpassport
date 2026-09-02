@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>agentpassport · 智能体数字护照治理控制台</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Microsoft YaHei", system-ui, sans-serif;
+  background: #0b0f1a; color: #e6e8ef; }
+header { padding: 18px 24px; border-bottom: 1px solid #1e2433;
+  display: flex; align-items: center; gap: 12px; }
+.logo { font-weight: 700; font-size: 18px; color: #7c9cff; }
+.badge { background: #16203a; padding: 2px 10px; border-radius: 12px;
+  font-size: 12px; color: #9aa4c0; }
+main { padding: 24px; display: grid; gap: 20px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.card { background: #12182a; border: 1px solid #1e2433; border-radius: 8px; padding: 16px; }
+.card .k { color: #8b94ad; font-size: 12px; }
+.card .v { font-size: 26px; font-weight: 700; margin-top: 6px; }
+table { width: 100%; border-collapse: collapse; background: #12182a; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #1e2433;
+  font-size: 13px; }
+th { color: #8b94ad; font-weight: 500; }
+.pass { color: #4ade80; } .fail { color: #f87171; }
+button { background: #2b3a63; color: #e6e8ef; border: 0; padding: 8px 16px;
+  border-radius: 6px; cursor: pointer; font-size: 13px; }
+button:hover { background: #3a4c80; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+input { background: #0b0f1a; border: 1px solid #2a3245; color: #e6e8ef;
+  padding: 8px 10px; border-radius: 6px; }
+.muted { color: #8b94ad; font-size: 12px; }
+</style>
+</head>
+<body>
+<header><span class="logo">agentpassport</span>
+  <span class="badge">智能体数字护照 · 循环审计 · 全链路溯源</span></header>
+<main>
+  <div class="cards" id="cards"></div>
+  <div class="row">
+    <input id="name" placeholder="名称" value="scanner" />
+    <input id="owner" placeholder="所属团队" value="security-team" />
+    <button onclick="issue()">签发护照</button>
+    <button onclick="verifyChain()">校验哈希链</button>
+    <span class="muted" id="msg"></span>
+  </div>
+  <table>
+    <thead><tr><th>Agent ID</th><th>名称</th><th>所属</th><th>状态</th><th>指纹</th></tr></thead>
+    <tbody id="tbody"><tr><td colspan="5" class="muted">加载中…</td></tr></tbody>
+  </table>
+</main>
+<script>
+const API = (location.protocol === "file:" ? "http://127.0.0.1:8420" : "");
+async function get(p) {
+  const r = await fetch(API + p); return r.json();
+}
+async function post(p, body) {
+  const r = await fetch(API + p, { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body) }); return r.json();
+}
+async function load() {
+  try {
+    const d = await get("/doctor");
+    const ps = await get("/passports");
+    document.getElementById("cards").innerHTML =
+      `<div class="card"><div class="k">护照数</div><div class="v">${d.passports}</div></div>` +
+      `<div class="card"><div class="k">审计记录</div><div class="v">${d.audit_records}</div></div>` +
+      `<div class="card"><div class="k">哈希链完整</div><div class="v ${d.chain_intact ? "pass" : "fail"}">${d.chain_intact ? "✓" : "✗"}</div></div>`;
+    const tb = document.getElementById("tbody");
+    tb.innerHTML = (ps || []).map(p =>
+      `<tr><td>${p.agent_id}</td><td>${p.name}</td><td>${p.owner}</td>` +
+      `<td class="${p.status === "active" ? "pass" : "fail"}">${p.status}</td>` +
+      `<td>${(p.fingerprint || "").slice(0, 12)}…</td></tr>`).join("") ||
+      `<tr><td colspan="5" class="muted">暂无护照</td></tr>`;
+  } catch (e) { document.getElementById("msg").textContent = "无法连接 API: " + e; }
+}
+async function issue() {
+  const r = await post("/passports", { name: document.getElementById("name").value,
+    owner: document.getElementById("owner").value });
+  document.getElementById("msg").textContent = "已签发: " + r.agent_id;
+  load();
+}
+async function verifyChain() {
+  const r = await get("/audit/verify");
+  document.getElementById("msg").textContent = "哈希链完整: " + r.intact;
+}
+load();
+</script>
+</body>
+</html>

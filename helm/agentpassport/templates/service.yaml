@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agentpassport.fullname" . }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "agentpassport.name" . }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8420
+  type: {{ .Values.service.type }}

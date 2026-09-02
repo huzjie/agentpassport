@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  agentpassport:
+    build: .
+    container_name: agentpassport
+    ports:
+      - "8420:8420"
+    environment:
+      AGENTPASSPORT_PASSPORT__SECRET: "change-me-in-production"
+      AGENTPASSPORT_AUDIT__INTERVAL_SEC: "3600"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

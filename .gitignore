@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# 运行时数据
+data/
+*.db
+*.sqlite3
+
+# 前端
+web/react/node_modules/
+web/react/dist/
+
+# 环境
+.env
+config.json
+config.yaml
+config.yml
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# 临时
+*.log
+.bootstrap
+.push_cache.json
